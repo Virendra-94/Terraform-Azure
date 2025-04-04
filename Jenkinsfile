@@ -6,28 +6,48 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Virendra-94/Terraform-Azure'
+                withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                    git branch: 'master', url: 'https://github.com/Virendra-94/Terraform-Azure'
+                }
             }
         }
         stage('Terraform Init') {
             steps {
-                withCredentials([string(credentialsId: 'AZURE_CREDENTIALS', variable: 'ARM_SERVICE_PRINCIPAL')]) {
-                    bat """
-                    echo Initializing Terraform...
-                    terraform init
-                    """
+                withEnv(["ARM_CLIENT_ID=${AZURE_CREDENTIALS.client_id}",
+                         "ARM_CLIENT_SECRET=${AZURE_CREDENTIALS.client_secret}",
+                         "ARM_SUBSCRIPTION_ID=${AZURE_CREDENTIALS.subscription_id}",
+                         "ARM_TENANT_ID=${AZURE_CREDENTIALS.tenant_id}"]) {
+                    script {
+                        if (isUnix()) {
+                            sh 'terraform init'
+                        } else {
+                            bat 'terraform init'
+                        }
+                    }
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
-                bat "terraform plan"
+                script {
+                    if (isUnix()) {
+                        sh 'terraform plan'
+                    } else {
+                        bat 'terraform plan'
+                    }
+                }
             }
         }
         stage('Terraform Apply') {
             steps {
                 input message: 'Apply Terraform Changes?', ok: 'Yes'
-                bat "terraform apply -auto-approve"
+                script {
+                    if (isUnix()) {
+                        sh 'terraform apply -auto-approve'
+                    } else {
+                        bat 'terraform apply -auto-approve'
+                    }
+                }
             }
         }
     }
