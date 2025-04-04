@@ -10,8 +10,8 @@ terraform {
 
 # configuring  the Azure Provider
 provider "azurerm" {
-  subscription_id = "d45d5d5b-2bc2-4f9b-a82b-3a2e6608afb5"
-  tenant_id       = "7a325369-5eda-4d37-803c-18c97c3527ef"
+  subscription_id = "5ec7926b-c3e7-4478-958b-fdb3243a8f23"
+  tenant_id       = "37fc5d2d-512f-4cc8-8dba-26c3e5281eb5"
 
   features {}
   resource_provider_registrations = "none"
